@@ -111,6 +111,10 @@ function main() {
 
   // Thiết lập điểm mắt và khối quan sát
   var viewProjMatrix = new Matrix4();
+  var modelMatrix = new Matrix4();  // Model matrix
+  var mvpMatrix = new Matrix4();    // Model view projection matrix
+  var normalMatrix = new Matrix4(); // Transformation matrix for normals
+
   viewProjMatrix.setPerspective(30.0, canvas.width / canvas.height, 1.0, 100.0); // Phép chiếu
   viewProjMatrix.lookAt(3.0, 3.0, 7.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0); // Góc nhìn quan sát
 
@@ -122,9 +126,6 @@ function main() {
   // Set the ambient light
   gl.uniform3f(u_AmbientLight, 0.2, 0.2, 0.2);
 
-  var modelMatrix = new Matrix4();  // Model matrix
-  var mvpMatrix = new Matrix4();    // Model view projection matrix
-  var normalMatrix = new Matrix4(); // Transformation matrix for normals
 /////
   // Pass the model view projection matrix to the variable u_MvpMatrix
   gl.uniformMatrix4fv(u_MvpMatrix, false, viewProjMatrix.elements);
@@ -143,35 +144,35 @@ function main() {
     var rect = ev.target.getBoundingClientRect();
     if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
       // Nếu vị trí Đã nhấp nằm bên trong <canvas>, hãy cập nhật bề mặt đã chọn
-      updatePickedFace(gl, n, x - rect.left, rect.bottom - y, u_PickedFace, viewProjMatrix, u_MvpMatrix);
+      updatePickedFace(gl, n, x - rect.left, rect.bottom - y, u_PickedFace, viewProjMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, mvpMatrix, u_NormalMatrix, normalMatrix);
     }
   }
 
   var tick = function() {   // Start drawing
     g_currentAngle = animate(g_currentAngle);
-    //draw(gl, n, g_currentAngle, viewProjMatrix, u_MvpMatrix);
+    draw(gl, n, g_currentAngle, viewProjMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, mvpMatrix, u_NormalMatrix, normalMatrix);
 /////
     // Calculate the model matrix
-    modelMatrix.setRotate(g_currentAngle, 0.0, 1.0, 0.0); // Rotate around the y-axis
-    modelMatrix.rotate(g_angleStepUD, 1.0, 0.0, 0.0);
+    // modelMatrix.setRotate(g_currentAngle, 0.0, 1.0, 0.0); // Rotate around the y-axis
+    // modelMatrix.rotate(g_angleStepUD, 1.0, 0.0, 0.0);
 
-    // Pass the model matrix to u_ModelMatrix
-    gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
+    // // Pass the model matrix to u_ModelMatrix
+    // gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
 
-    // Pass the model view projection matrix to u_MvpMatrix
-    mvpMatrix.set(viewProjMatrix).multiply(modelMatrix);
-    gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
+    // // Pass the model view projection matrix to u_MvpMatrix
+    // mvpMatrix.set(viewProjMatrix).multiply(modelMatrix);
+    // gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
 
-    // Pass the matrix to transform the normal based on the model matrix to u_NormalMatrix
-    normalMatrix.setInverseOf(modelMatrix);
-    normalMatrix.transpose();
-    gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
+    // // Pass the matrix to transform the normal based on the model matrix to u_NormalMatrix
+    // normalMatrix.setInverseOf(modelMatrix);
+    // normalMatrix.transpose();
+    // gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
 
-    // Clear color and depth buffer
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    // // Clear color and depth buffer
+    // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // Draw the cube
-    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+    // // Draw the cube
+    // gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 /////
     requestAnimationFrame(tick, canvas);
   };
@@ -208,12 +209,12 @@ function initVertexBuffers(gl) {
   ]);
 
   var colors = new Float32Array([   // Màu
-    0.0, 0.32, 0.61,   0.0, 0.32, 0.61,   0.0, 0.32, 0.61,   0.0, 0.32, 0.61, // v0-v1-v2-v3 front
-    0.73, 0.82, 0.93,  0.73, 0.82, 0.93,  0.73, 0.82, 0.93,  0.73, 0.82, 0.93,  // v0-v3-v4-v5 right
-    0.0, 0.32, 0.61,   0.0, 0.32, 0.61,   0.0, 0.32, 0.61,   0.0, 0.32, 0.61, // v0-v5-v6-v1 up
-    0.73, 0.82, 0.93,  0.73, 0.82, 0.93,  0.73, 0.82, 0.93,  0.73, 0.82, 0.93,  // v1-v6-v7-v2 left
-    0.0, 0.32, 0.61,   0.0, 0.32, 0.61,   0.0, 0.32, 0.61,   0.0, 0.32, 0.61, // v7-v4-v3-v2 down
-    0.0, 0.32, 0.61,   0.0, 0.32, 0.61,   0.0, 0.32, 0.61,   0.0, 0.32, 0.61, // v4-v7-v6-v5 back
+     1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,    // v0-v1-v2-v3 front
+     0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,    // v0-v3-v4-v5 right
+     0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,    // v0-v5-v6-v1 up
+     1.0, 1.0, 0.0,   1.0, 1.0, 0.0,   1.0, 1.0, 0.0,   1.0, 1.0, 0.0,    // v1-v6-v7-v2 left
+     1.0, 0.0, 1.0,   1.0, 0.0, 1.0,   1.0, 0.0, 1.0,   1.0, 0.0, 1.0,    // v7-v4-v3-v2 down
+     0.0, 1.0, 1.0,   0.0, 1.0, 1.0,   0.0, 1.0, 1.0,   0.0, 1.0, 1.0     // v4-v7-v6-v5 back
    ]);
 
   var faces = new Uint8Array([   // Mặt
@@ -259,7 +260,7 @@ function initVertexBuffers(gl) {
 }
 
 // Phát hiện bề mặt nào được chọn ([Trả lại số bề mặt theo vị trí của điểm])
-function updatePickedFace(gl, n, x, y, u_PickedFace, viewProjMatrix, u_MvpMatrix) {
+function updatePickedFace(gl, n, x, y, u_PickedFace, viewProjMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, mvpMatrix, u_NormalMatrix, normalMatrix) {
   var pixels = new Uint8Array(4); // Mảng để lưu trữ giá trị pixel [R,G,B,A]
 
   // Ghi số bề mặt(A) vào thành phần (nếu được chọn) 
@@ -268,7 +269,7 @@ function updatePickedFace(gl, n, x, y, u_PickedFace, viewProjMatrix, u_MvpMatrix
 
   // Lúc này, giá trị của mỗi bề mặt phụ thuộc vào số bề mặt 
   // (bước vẽ này sẽ được thực hiện trong bộ đệm màu và sẽ không hiển thị trên màn hình)
-  draw(gl, n, g_currentAngle, viewProjMatrix, u_MvpMatrix);
+  draw(gl, n, g_currentAngle, viewProjMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, mvpMatrix, u_NormalMatrix, normalMatrix);
 
   // Đọc giá trị pixel của vị trí được nhấp. pixel [3] là số bề mặt
   gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
@@ -276,20 +277,38 @@ function updatePickedFace(gl, n, x, y, u_PickedFace, viewProjMatrix, u_MvpMatrix
 }
 
 var g_MvpMatrix = new Matrix4(); // Ma trận chiếu chế độ xem mô hình
-function draw(gl, n, currentAngle, viewProjMatrix, u_MvpMatrix) {
+function draw(gl, n, currentAngle, viewProjMatrix, u_MvpMatrix, modelMatrix, u_ModelMatrix, mvpMatrix, u_NormalMatrix, normalMatrix) {
   // Tính toán Ma trận chiếu ở chế độ chuyển động và truyền nó tới u_MvpMatrix
-  g_MvpMatrix.set(viewProjMatrix);
+  // g_MvpMatrix.set(viewProjMatrix);
 
-  //g_MvpMatrix.rotate(g_angleStepRL, 1.0, 0.0, 0.0);
+  // g_MvpMatrix.rotate(g_angleStepUD, 0.0, 0.0, 1.0);
 
-  //g_MvpMatrix.rotate(g_angleStepUD, 0.0, 0.0, 1.0);
+  // g_MvpMatrix.rotate(g_currentAngle, 0.0, 1.0, 0.0);
 
-  //g_MvpMatrix.rotate(g_currentAngle, 0.0, 1.0, 0.0);
+  // gl.uniformMatrix4fv(u_MvpMatrix, false, g_MvpMatrix.elements);
 
-  gl.uniformMatrix4fv(u_MvpMatrix, false, g_MvpMatrix.elements);
+  // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);     // Vùng đệm màu nền và chiều sâu
+  // gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);   // Vẽ hình lập phương
+    modelMatrix.setRotate(g_currentAngle, 0.0, 1.0, 0.0); // Rotate around the y-axis
+    modelMatrix.rotate(g_angleStepUD, 1.0, 0.0, 0.0);
 
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);     // Vùng đệm màu nền và chiều sâu
-  gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);   // Vẽ hình lập phương
+    // Pass the model matrix to u_ModelMatrix
+    gl.uniformMatrix4fv(u_MvpMatrix, false, g_MvpMatrix.elements);
+
+    // Pass the model view projection matrix to u_MvpMatrix
+    mvpMatrix.set(viewProjMatrix).multiply(modelMatrix);
+    gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
+
+    // Pass the matrix to transform the normal based on the model matrix to u_NormalMatrix
+    normalMatrix.setInverseOf(modelMatrix);
+    normalMatrix.transpose();
+    gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
+
+    // Clear color and depth buffer
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // Draw the cube
+    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 }
 
 var last = Date.now(); // Lần cuối cùng mà hàm này được gọi là
