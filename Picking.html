@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Pick face</title>
+
+    <style type="text/css">
+      canvas{
+          padding-left: 0;
+          padding-right: 0;
+          margin-left: auto;
+          margin-right: auto;
+          display: block;
+      }
+    </style>
+
+    <script src="../lib/webgl-utils.js"></script>
+    <script src="../lib/webgl-debug.js"></script>
+    <script src="../lib/cuon-utils.js"></script>
+    <script src="../lib/cuon-matrix.js"></script>
+    <script src="Picking.js"></script>
+  </head>
+
+  <body onload="main()">
+    <canvas id="webgl" width="500" height="500">
+      Please use a browser that supports "canvas"
+    </canvas>
+    <p style="text-align: center;">
+      <button type="button" onclick="up()">UP</button>
+      <br>
+      <button type="button" onclick="left()">LEFT</button>
+      <button type="button" onclick="stop()">STOP</button>
+      <button type="button" onclick="right()">RIGHT</button>
+      <br>
+      <button type="button" onclick="down()">DOWN</button>
+    </p>
+  </body>
+</html>
