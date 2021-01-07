@@ -136,6 +136,9 @@ function main() {
 
   // Khởi tạo bề mặt
   gl.uniform1i(u_PickedFace, -1);
+  ///// start thêm 9 //////////
+  document.onkeydown = function(ev){ keydown(ev, gl, n, g_currentAngle); };
+  ///// end thêm 9 //////////
 
   // Đăng ký trình xử lý sự kiện click chuột
   canvas.onmousedown = function(ev) {   // Chuột được nhấn
@@ -148,6 +151,28 @@ function main() {
       ///// end sửa 2 //////////
     }
   }
+  ///// start thêm 10 //////////
+  function keydown(ev, gl, n, g_currentAngle) {
+  switch (ev.keyCode) {
+    case 32: // spacebar
+      ANGLE_STEP = 0.0;
+      break;
+    case 38: // Up arrow key -> the positive rotation of joint1 around the z-axis
+      g_angleStepUD -= 15.0;
+      break;
+    case 40: // Down arrow key -> the negative rotation of joint1 around the z-axis
+      g_angleStepUD += 15.0;
+      break;
+    case 39: // Right arrow key -> the positive rotation of arm1 around the y-axis
+      ANGLE_STEP += 20.0;
+      break;
+    case 37: // Left arrow key -> the negative rotation of arm1 around the y-axis
+      ANGLE_STEP -= 20.0;
+      break;
+    default: return; // Skip drawing at no effective action
+  }
+}
+  ///// end thêm 10 //////////
 
   var tick = function() {   // Start drawing
     g_currentAngle = animate(g_currentAngle);
@@ -324,25 +349,3 @@ function initArrayBuffer (gl, data, type, num, attribute) {
 
   return true;
 }
-
-///// start thêm 9 //////////
-function up() {
-  g_angleStepUD -= 15.0;
-}
-
-function down() {
-  g_angleStepUD += 15.0;
-}
-
-function right() {
-  ANGLE_STEP += 20.0;
-}
-
-function left() {
-  ANGLE_STEP -= 20.0;
-}
-
-function stop() {
-  ANGLE_STEP = 0.0;
-}
-///// end thêm 9 //////////
